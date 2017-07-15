@@ -26,9 +26,3 @@ c0 a8 75 85	  == Source IP (O)
 7d d1 de 8e	  == Destination IP (O)
 b7 a0		  == Source Port (O)
 00 50		  == Destination Port (O)
-
-{key:value}
-
-a = {'math':97, 'korea':77}
-
-a['math']
