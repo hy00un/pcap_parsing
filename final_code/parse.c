@@ -68,5 +68,23 @@ void packet_data(u_char *args, const struct pcap_pkthdr *header,const u_char *pa
     D_port[1] = *(packet++);
     printf("[-]Source port : %d\n",S_port[0]*100 + S_port[1]);
     printf("[-]Destination port : %d\n", D_port[0]*100+ D_port[1]);
-    printf("\n");
+    packet+=16;
+    int count = 0;
+    printf("======================DATA======================\n");
+    while(count<200)
+    {
+        if(packet==NULL || *packet==0)
+        {
+            printf("No Packet");
+            break;
+        }
+        else
+        {
+            printf("%02x ",*packet++);
+            count++;
+            if(count%16==0)
+                printf("\n");
+        }
     }
+    printf("\n\n\n");
+}
