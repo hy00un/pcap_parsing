@@ -1,0 +1,34 @@
+00 50 56 f0 e8 47 00 0c 29 a8 da 47 08 00 45 00 
+00 28 35 ed 40 00 40 06 07 ce c0 a8 75 85 ac d9 
+1a 0e ce d6 00 50 be d6 91 33 62 74 6f 8c 50 10 
+77 7a fd 2f 00 00 
+
+
+00 50 56 f0 e8 47 00 0c 29 a8 da 47 08 00 45 00 
+00 28 0a 74 40 00 40 06 9d ce c0 a8 75 85 7d d1 
+de 8e b7 a0 00 50 49 37 e0 73 11 20 7d 2a 50 10 
+75 40 92 a8 00 00
+
+
+00 50 56 f0 e8 47 == Destination MAC (O)
+00 0c 29 a8 da 47 == Source MAC (O)
+08 00 		  == Type(IPv4)
+45 		  == Version: 4, Header Length: 20 bytes(5)
+00		  == Differentiated Services Field
+00 28 		  == Total length
+0a 74 		  == Identification
+40 		  == Flags
+00		  == Fragment offset
+40		  == TTL
+06		  == Protocol TCP (6)
+9d ce		  == Header Checksum
+c0 a8 75 85	  == Source IP (O)
+7d d1 de 8e	  == Destination IP (O)
+b7 a0		  == Source Port (O)
+00 50		  == Destination Port (O)
+
+{key:value}
+
+a = {'math':97, 'korea':77}
+
+a['math']
