@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     char *dev;			/* The device to sniff on */
 	char errbuf[PCAP_ERRBUF_SIZE];	/* Error string */
 	struct bpf_program fp;		/* The compiled filter */
-	char filter_exp[] = "port 80";	/* The filter expression */
+	char filter_exp[] = "";	/* The filter expression */
 	bpf_u_int32 mask;		/* Our netmask */
 	bpf_u_int32 net;		/* Our IP */
 	struct pcap_pkthdr header;	/* The header that pcap gives us */
@@ -46,45 +46,55 @@ int main(int argc, char *argv[])
 }
 
 void packet_data(u_char *args, const struct pcap_pkthdr *header,const u_char *packet) {
-    int S_ip[5]={0,}, D_ip[5]={0,}, S_port[3]={0,}, D_port[3]={0,};
+    int S_ip[5]={0,}, D_ip[5]={0,}, S_port[3]={0,}, D_port[3]={0,}, Type[3]={0,};
     //if(packet == NULL || header->caplen == 0)
     printf("[*]Jacked a packet with length of [%d]\n", header->len);
     printf("[-]Destination mac : %02x:%02x:%02x:%02x:%02x:%02x\n", *(packet++), *(packet++), *(packet++), *(packet++), *(packet++), *(packet++));
     printf("[-]Source mac : %02x:%02x:%02x:%02x:%02x:%02x\n", *(packet++), *(packet++), *(packet++), *(packet++), *(packet++), *(packet++));
-    packet+=14;
-    S_ip[3] = (*packet++);
-    S_ip[2] = (*packet++);
-    S_ip[1] = (*packet++);
-    S_ip[0] = (*packet++);
-    printf("[-]Source IP : %02d.%02d.%02d.%02d\n", S_ip[0], S_ip[1], S_ip[2], S_ip[3]);
-    D_ip[3] = (*packet++);
-    D_ip[2] = (*packet++);
-    D_ip[1] = (*packet++);
-    D_ip[0] = (*packet++);
-    printf("[-]Destination IP : %02d.%02d.%02d.%02d\n", D_ip[0], D_ip[1], D_ip[2], D_ip[3]);
-    S_port[0] = *(packet++);
-    S_port[1] = *(packet++);
-    D_port[0] = *(packet++);
-    D_port[1] = *(packet++);
-    printf("[-]Source port : %d\n",S_port[0]*100 + S_port[1]);
-    printf("[-]Destination port : %d\n", D_port[0]*100+ D_port[1]);
-    packet+=16;
-    int count = 0;
-    printf("======================DATA======================\n");
-    while(count<200)
-    {
-        if(packet==NULL || *packet==0)
+    Type[0] = (*packet++);
+    Type[1] = (*packet++);
+    if(Type[0] == 8 && Type[1] == 00) {
+        printf("[-]Type : IPv4\n");
+        packet+=12;
+        S_ip[0] = (*packet++);
+        S_ip[1] = (*packet++);
+        S_ip[2] = (*packet++);
+        S_ip[3] = (*packet++);
+        printf("[-]Source IP : %02d.%02d.%02d.%02d\n", S_ip[0], S_ip[1], S_ip[2], S_ip[3]);
+        D_ip[0] = (*packet++);
+        D_ip[1] = (*packet++);
+        D_ip[2] = (*packet++);
+        D_ip[3] = (*packet++);
+        printf("[-]Destination IP : %02d.%02d.%02d.%02d\n", D_ip[0], D_ip[1], D_ip[2], D_ip[3]);
+        S_port[0] = *(packet++);
+        S_port[1] = *(packet++);
+        D_port[0] = *(packet++);
+        D_port[1] = *(packet++);
+        printf("[-]Source port : %d\n",S_port[0]*100 + S_port[1]);
+        printf("[-]Destination port : %d\n", D_port[0]*100+ D_port[1]);
+        packet+=16;
+        int count = 0;
+        printf("======================DATA======================\n");
+        while(count<200)
         {
-            printf("No Packet");
-            break;
+            if(packet==NULL || *packet==0)
+            {
+                printf("No Packet");
+                break;
+            }
+            else
+            {
+                printf("%02x ",*packet++);
+                count++;
+                if(count%16==0)
+                    printf("\n");
+            }
         }
-        else
-        {
-            printf("%02x ",*packet++);
-            count++;
-            if(count%16==0)
-                printf("\n");
-        }
+    }
+    else if(Type[0] == 8 && Type[1] == 6)
+        printf("[-]Type : ARP");
+    else {
+        printf("[-]This packet is not IPv4 or ARP type!!");
     }
     printf("\n\n\n");
 }
