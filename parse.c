@@ -92,15 +92,13 @@ int main(int argc, char* argv[]) {
         ip = (struct sniff_ip*)(pkt_data+SIZE_ETHERNET);
         tcp = (struct sniff_tcp*)(pkt_data+SIZE_ETHERNET+IP_HL(ip)*4);
         data = (char*)(pkt_data+SIZE_ETHERNET+IP_HL(ip)*4+TH_OFF(tcp)*4);
-        //printf("%d",ip->ip_len);
+        //printf("%02x\n\n",ntohs(ip->ip_len));
         //printf("%x\n\n",ethernet->ether_type);:q
         //if(tcp->th_sport!=80 || tcp->th_dport!=80) continue;
 
         //if(ethernet->ip_p == IPPROTO_TCP)
         if(ntohs(tcp->th_sport)!= 0x50 && ntohs(tcp->th_dport)!=0x50) continue;
-        //if(i-(ip->ip_len)-)
-
-
+        //if(data[0]==0 && data[1]==0) continue;
         if(ntohs(ethernet->ether_type)==0x0800){
             printf("destination mac : ");
             for(int i=0;i<=5;i++)
@@ -118,6 +116,10 @@ int main(int argc, char* argv[]) {
             printf("source ip : %s\n",buf2);
             printf("source port : %d\n",ntohs(tcp->th_sport));
             printf("destination port : %d\n",ntohs(tcp->th_dport));
+            if(ntohs(ip->ip_len) - IP_HL(ip)*4 - TH_OFF(tcp)*4 == 0){
+                printf("NO DATA\n\n");
+                continue;
+            }
             for(int i=0;i<25;i++)
                 printf("%02x ",data[i]);
             printf("\n\n");
