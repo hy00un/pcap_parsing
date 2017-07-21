@@ -65,7 +65,8 @@
 	const char *data; /* Packet payload */
 
 int main(int argc, char* argv[]) {
-	char buf[6];
+	char buf[20];
+    char buf2[20];
     pcap_t *handle;
     char errbuf[PCAP_ERRBUF_SIZE];
 	struct pcap_pkthdr *header;
@@ -92,23 +93,34 @@ int main(int argc, char* argv[]) {
         tcp = (struct sniff_tcp*)(pkt_data+SIZE_ETHERNET+IP_HL(ip)*4);
         data = (char*)(pkt_data+SIZE_ETHERNET+IP_HL(ip)*4+TH_OFF(tcp)*4);
         //printf("%d",ip->ip_len);
-        //printf("%d\n\n",ethernet->ether_type);
-        if(ethernet->ether_type=0x8000){
+        //printf("%x\n\n",ethernet->ether_type);:q
+        //if(tcp->th_sport!=80 || tcp->th_dport!=80) continue;
+
+        //if(ethernet->ip_p == IPPROTO_TCP)
+        if(ntohs(tcp->th_sport)!= 0x50 && ntohs(tcp->th_dport)!=0x50) continue;
+        //if(i-(ip->ip_len)-)
+
+
+        if(ntohs(ethernet->ether_type)==0x0800){
             printf("destination mac : ");
-            for(int i=0;i<5;i++)
+            for(int i=0;i<=5;i++)
                 printf("%02x ",(ethernet->ether_dhost[i]));
             printf("\n");
             printf("source mac : ");
-            for(int i=0;i<5;i++)
+            for(int i=0;i<=5;i++)
                 printf("%02x ",(ethernet->ether_shost[i]));
             printf("\n");
-            printf("destination ip : %s\n",inet_ntoa(ip->ip_dst));
-            printf("source ip : %s\n",inet_ntoa(ip->ip_src));
+            //printf("destination ip : %s\n",inet_ntoa(ip->ip_dst));
+            //printf("source ip : %s\n",inet_ntoa(ip->ip_src));
+            inet_ntop(AF_INET,(&ip->ip_dst),buf,sizeof(buf));
+            inet_ntop(AF_INET,(&ip->ip_src),buf2,sizeof(buf2));
+            printf("destination ip : %s\n",buf);
+            printf("source ip : %s\n",buf2);
             printf("source port : %d\n",ntohs(tcp->th_sport));
             printf("destination port : %d\n",ntohs(tcp->th_dport));
-            //for(int i=0;i<25;i++)
-            //    printf("%02x ",data[i]);
-            printf("\n");
+            for(int i=0;i<25;i++)
+                printf("%02x ",data[i]);
+            printf("\n\n");
         }
         //printf("");
         //printf("%s ",ip->ip_src);
