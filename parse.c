@@ -100,11 +100,11 @@ int main(int argc, char* argv[]) {
         if(ntohs(tcp->th_sport)!= 0x50 && ntohs(tcp->th_dport)!=0x50) continue;
         //if(data[0]==0 && data[1]==0) continue;
         if(ntohs(ethernet->ether_type)==0x0800){
-            printf("destination mac : ");
+            printf("[-]destination mac : ");
             for(int i=0;i<=5;i++)
                 printf("%02x ",(ethernet->ether_dhost[i]));
             printf("\n");
-            printf("source mac : ");
+            printf("[-]source mac : ");
             for(int i=0;i<=5;i++)
                 printf("%02x ",(ethernet->ether_shost[i]));
             printf("\n");
@@ -112,16 +112,20 @@ int main(int argc, char* argv[]) {
             //printf("source ip : %s\n",inet_ntoa(ip->ip_src));
             inet_ntop(AF_INET,(&ip->ip_dst),buf,sizeof(buf));
             inet_ntop(AF_INET,(&ip->ip_src),buf2,sizeof(buf2));
-            printf("destination ip : %s\n",buf);
-            printf("source ip : %s\n",buf2);
-            printf("source port : %d\n",ntohs(tcp->th_sport));
-            printf("destination port : %d\n",ntohs(tcp->th_dport));
+            printf("[-]destination ip : %s\n",buf);
+            printf("[-]source ip : %s\n",buf2);
+            printf("[-]source port : %d\n",ntohs(tcp->th_sport));
+            printf("[-]destination port : %d\n",ntohs(tcp->th_dport));
+            printf("======================DATA======================\n");
             if(ntohs(ip->ip_len) - IP_HL(ip)*4 - TH_OFF(tcp)*4 == 0){
                 printf("NO DATA\n\n");
                 continue;
             }
-            for(int i=0;i<25;i++)
+            for(int i=1;i<=32;i++){
                 printf("%02x ",data[i]);
+                if(i%16==0)
+                    printf("\n");
+            }
             printf("\n\n");
         }
         //printf("");
