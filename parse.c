@@ -122,7 +122,7 @@ int main(int argc, char* argv[]) {
                 continue;
             }
             for(int i=1;i<=32;i++){
-                printf("%02x ",data[i]);
+                printf("%02x ",data[i-1]);
                 if(i%16==0)
                     printf("\n");
             }
