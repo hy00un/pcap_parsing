@@ -5,6 +5,8 @@
 
 /* Ethernet addresses are 6 bytes */
 #define ETHER_ADDR_LEN	6
+#define ETHERTYPE_IP 0x0800
+#define IPROTO_TCP 6
 
 	/* Ethernet header */
 	typedef struct sniff_ethernet {
@@ -78,8 +80,11 @@ int main(int argc, char* argv[]) {
         return 0;
     }
     handle = pcap_open_live(argv[1], BUFSIZ, 1, 1000, errbuf);
-    if(handle == NULL)
+    if(handle == NULL) {
+        fprintf(stderr, "Couldn't open deivce %s : %s",argv[1],errbuf);
         return 0;
+    }
+
     while(1){
         packet = pcap_next_ex(handle, &header, &pkt_data);
         if(packet == -1 || packet == -2)
@@ -97,9 +102,10 @@ int main(int argc, char* argv[]) {
         //if(tcp->th_sport!=80 || tcp->th_dport!=80) continue;
 
         //if(ethernet->ip_p == IPPROTO_TCP)
+        if(ip->ip_p != IPPROTO_TCP) continue;
         if(ntohs(tcp->th_sport)!= 0x50 && ntohs(tcp->th_dport)!=0x50) continue;
         //if(data[0]==0 && data[1]==0) continue;
-        if(ntohs(ethernet->ether_type)==0x0800){
+        if(ntohs(ethernet->ether_type)==ETHERTYPE_IP){
             printf("[-]destination mac : ");
             for(int i=0;i<=5;i++)
                 printf("%02x ",(ethernet->ether_dhost[i]));
@@ -121,7 +127,8 @@ int main(int argc, char* argv[]) {
                 printf("NO DATA\n\n");
                 continue;
             }
-            for(int i=1;i<=32;i++){
+            int TCP_DATA_SIZE = (header->len)-(SIZE_ETHERNET+IP_HL(ip)*4+TH_OFF(tcp)*4);
+            for(int i=1;i<=TCP_DATA_SIZE;i++){
                 printf("%02x ",data[i-1]);
                 if(i%16==0)
                     printf("\n");
