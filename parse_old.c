@@ -61,20 +61,21 @@ struct sniff_tcp {
 
 #define SIZE_ETHERNET 14
 
+const struct sniff_ethernet *ethernet; /* The ethernet header */
+const struct sniff_ip *ip; /* The IP header */
+const struct sniff_tcp *tcp; /* The TCP header */
+const char *data; /* Packet payload */
+
 int main(int argc, char* argv[]) {
-    //struct sniff_ehternet *ethernet;
-    struct sniff_ip *ip;
-    struct sniff_tcp *tcp;
-    SSS *ethernet;
-    char *data;
     char buf[20];
     char buf2[20];
     pcap_t *handle;
     char errbuf[PCAP_ERRBUF_SIZE];
     struct pcap_pkthdr *header;
     int packet;
+    SSS *ethernet;
     const u_char *pkt_data;
-    if(argv[1] == NULL || argc < 2) {
+    if(argv[1] == NULL) {
         printf("Input Interface name\n");
         return 0;
     }
@@ -97,12 +98,13 @@ int main(int argc, char* argv[]) {
         tcp = (struct sniff_tcp*)(pkt_data+SIZE_ETHERNET+IP_HL(ip)*4);
         data = (char*)(pkt_data+SIZE_ETHERNET+IP_HL(ip)*4+TH_OFF(tcp)*4);
         //printf("%02x\n\n",ntohs(ip->ip_len));
-        //printf("%x\n\n",ethernet->ether_type);
+        //printf("%x\n\n",ethernet->ether_type);:q
         //if(tcp->th_sport!=80 || tcp->th_dport!=80) continue;
 
         //if(ethernet->ip_p == IPPROTO_TCP)
-        if(ntohs(tcp->th_sport)!= 80 && ntohs(tcp->th_dport)!= 80) continue;
         if(ip->ip_p != IPPROTO_TCP) continue;
+        if(ntohs(tcp->th_sport)!= 0x50 && ntohs(tcp->th_dport)!=0x50) continue;
+        //if(data[0]==0 && data[1]==0) continue;
         if(ntohs(ethernet->ether_type)==ETHERTYPE_IP) {
             printf("[-]destination mac : ");
             for(int i=0; i<=5; i++)
@@ -125,8 +127,8 @@ int main(int argc, char* argv[]) {
                 printf("NO DATA\n\n");
                 continue;
             }
-            int tcp_data_size = (header->len)-(SIZE_ETHERNET+IP_HL(ip)*4+TH_OFF(tcp)*4);
-            for(int i=1; i<=tcp_data_size; i++) {
+            int TCP_DATA_SIZE = (header->len)-(SIZE_ETHERNET+IP_HL(ip)*4+TH_OFF(tcp)*4);
+            for(int i=1; i<=TCP_DATA_SIZE; i++) {
                 printf("%02x ",data[i-1]);
                 if(i%16==0)
                     printf("\n");
